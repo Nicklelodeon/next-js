@@ -1,17 +1,15 @@
-import { MongoClient, ObjectId } from "mongodb";
-import MeetupDetail from "../../components/meetups/MeetupDetail";
-import { Fragment } from "react";
-import Head from "next/head";
+import { MongoClient, ObjectId } from 'mongodb';
+import { Fragment } from 'react';
+import Head from 'next/head';
+
+import MeetupDetail from '../../components/meetups/MeetupDetail';
 
 function MeetupDetails(props) {
   return (
     <Fragment>
       <Head>
         <title>{props.meetupData.title}</title>
-        <meta
-          name="description"
-          content={props.meetupData.description}
-        />
+        <meta name='description' content={props.meetupData.description} />
       </Head>
       <MeetupDetail
         image={props.meetupData.image}
@@ -23,22 +21,20 @@ function MeetupDetails(props) {
   );
 }
 
-// have to use if dynamic page and getStaticProps is used
 export async function getStaticPaths() {
   const client = await MongoClient.connect(
-    "mongodb+srv://nicholascheong2618:Inaymmm2618@cluster0.jyw8gxz.mongodb.net/?retryWrites=true&w=majority"
+    'mongodb+srv://maximilian:TU6WdZF2EjFWsqUt@cluster0.ntrwp.mongodb.net/meetups?retryWrites=true&w=majority'
   );
   const db = client.db();
 
-  const meetupsCollection = db.collection("meetups");
-  // first param is item to find, second param is which field to extract in each doc
-  // in this case, only retrieve _id
+  const meetupsCollection = db.collection('meetups');
+
   const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
+
   client.close();
+
   return {
-    // if false, any meetupId not stated will show 404 error
-    // if true, any meetupId not stated will be rendered dynamically
-    fallback: false,
+    fallback: 'blocking',
     paths: meetups.map((meetup) => ({
       params: { meetupId: meetup._id.toString() },
     })),
@@ -46,22 +42,23 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps(context) {
-  // identifier in square bracket [meetupId] will be properties and the
-  // values (meetupId) are actual values encoded in url
+  // fetch data for a single meetup
+
   const meetupId = context.params.meetupId;
+
   const client = await MongoClient.connect(
-    "mongodb+srv://nicholascheong2618:Inaymmm2618@cluster0.jyw8gxz.mongodb.net/?retryWrites=true&w=majority"
+    'mongodb+srv://maximilian:TU6WdZF2EjFWsqUt@cluster0.ntrwp.mongodb.net/meetups?retryWrites=true&w=majority'
   );
   const db = client.db();
 
-  const meetupsCollection = db.collection("meetups");
-  // first param is item to find, second param is which field to extract in each doc
-  // in this case, only retrieve _id
+  const meetupsCollection = db.collection('meetups');
+
   const selectedMeetup = await meetupsCollection.findOne({
-    _id: new ObjectId(meetupId),
+    _id: ObjectId(meetupId),
   });
+
   client.close();
-  // fetch data for single meetup
+
   return {
     props: {
       meetupData: {
